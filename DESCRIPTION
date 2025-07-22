@@ -1,0 +1,29 @@
+Package: survdnn
+Title: Deep Neural Networks for Survival Analysis Using 'torch'
+Version: 0.6.0
+Authors@R: 
+    person(given = "Imad", 
+           family = "EL BADISY", 
+           email = "elbadisyimad@gmail.com", 
+           role = c("aut", "cre"))
+Description: Provides deep learning models for right-censored survival data using the 'torch' backend. 
+    Supports multiple loss functions, including Cox partial likelihood, L2-penalized Cox, time-dependent Cox, 
+    and accelerated failure time (AFT) loss. Offers a formula-based interface, built-in support for cross-validation, 
+    hyperparameter tuning, survival curve plotting, and evaluation metrics such as the C-index, Brier score, 
+    and integrated Brier score. For methodological details, see Kvamme et al. (2019) <https://www.jmlr.org/papers/v20/18-424.html>.
+License: MIT + file LICENSE
+Encoding: UTF-8
+Depends: R (>= 4.1.0)
+Imports: torch, survival, stats, utils, tibble, dplyr, purrr, tidyr,
+        ggplot2, methods, rsample, cli, glue
+Suggests: testthat (>= 3.0.0), knitr, rmarkdown
+RoxygenNote: 7.3.2
+Config/testthat/edition: 3
+BugReports: https://github.com/ielbadisy/survdnn/issues
+URL: https://github.com/ielbadisy/survdnn
+NeedsCompilation: no
+Packaged: 2025-07-21 12:44:39 UTC; imad-el-badisy
+Author: Imad EL BADISY [aut, cre]
+Maintainer: Imad EL BADISY <elbadisyimad@gmail.com>
+Repository: CRAN
+Date/Publication: 2025-07-22 11:11:46 UTC
