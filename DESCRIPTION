@@ -1,6 +1,6 @@
 Package: survdnn
 Title: Deep Neural Networks for Survival Analysis Using 'torch'
-Version: 0.6.0
+Version: 0.6.3
 Authors@R: 
     person(given = "Imad", 
            family = "EL BADISY", 
@@ -17,13 +17,13 @@ Depends: R (>= 4.1.0)
 Imports: torch, survival, stats, utils, tibble, dplyr, purrr, tidyr,
         ggplot2, methods, rsample, cli, glue
 Suggests: testthat (>= 3.0.0), knitr, rmarkdown
-RoxygenNote: 7.3.2
+RoxygenNote: 7.3.3
 Config/testthat/edition: 3
 BugReports: https://github.com/ielbadisy/survdnn/issues
 URL: https://github.com/ielbadisy/survdnn
 NeedsCompilation: no
-Packaged: 2025-07-21 12:44:39 UTC; imad-el-badisy
+Packaged: 2025-10-30 13:36:35 UTC; imad-el-badisy
 Author: Imad EL BADISY [aut, cre]
 Maintainer: Imad EL BADISY <elbadisyimad@gmail.com>
 Repository: CRAN
-Date/Publication: 2025-07-22 11:11:46 UTC
+Date/Publication: 2025-10-30 13:50:02 UTC

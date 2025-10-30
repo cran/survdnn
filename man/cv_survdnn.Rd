@@ -36,6 +36,7 @@ A tibble containing metric values per fold and (optionally) per time point.
 Performs cross-validation for a `survdnn` model using the specified evaluation metrics.
 }
 \examples{
+\donttest{
 library(survival)
 data(veteran)
 cv_survdnn(
@@ -48,4 +49,5 @@ cv_survdnn(
   hidden = c(16, 8),
   epochs = 5
 )
+}
 }

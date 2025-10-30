@@ -40,14 +40,18 @@ hyperparameter tuning.
 ## Installation
 
 ``` r
+# Install from CRAN
+install.packages("surdnn")
+
+
 # Install from GitHub
-# install.packages("remotes")
+install.packages("remotes")
 remotes::install_github("ielbadisy/survdnn")
 
 # Or clone and install locally
-# git clone https://github.com/ielbadisy/survdnn.git
-# setwd("survdnn")
-# devtools::install()
+git clone https://github.com/ielbadisy/survdnn.git
+setwd("survdnn")
+devtools::install()
 ```
 
 ------------------------------------------------------------------------
@@ -68,11 +72,11 @@ mod <- survdnn(
   epochs = 100,
   loss = "cox",
   verbose = TRUE
-)
+  )
 ```
 
-    ## Epoch 50 - Loss: 3.987919
-    ## Epoch 100 - Loss: 3.974391
+    ## Epoch 50 - Loss: 3.898330
+    ## Epoch 100 - Loss: 3.834461
 
 ``` r
 summary(mod)
@@ -80,18 +84,18 @@ summary(mod)
 
     ## 
 
-    ## ── Summary of survdnn model ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+    ## ── Summary of survdnn model ─────────────────────────────────────────────────────────────────────
 
     ## 
     ## Formula:
     ##   Surv(time, status) ~ age + karno + celltype
-    ## <environment: 0x5b3739336aa0>
+    ## <environment: 0x57f5687daa00>
     ## 
     ## Model architecture:
     ##   Hidden layers:  32 : 16 
     ##   Activation:  relu 
     ##   Dropout:  0.3 
-    ##   Final loss:  3.974391 
+    ##   Final loss:  3.834461 
     ## 
     ## Training summary:
     ##   Epochs:  100 
@@ -122,8 +126,8 @@ mod1 <- survdnn(
   )
 ```
 
-    ## Epoch 50 - Loss: 4.216911
-    ## Epoch 100 - Loss: 4.105076
+    ## Epoch 50 - Loss: 3.991873
+    ## Epoch 100 - Loss: 3.937163
 
 ``` r
 # Accelerated Failure Time
@@ -135,8 +139,8 @@ mod2 <- survdnn(
   )
 ```
 
-    ## Epoch 50 - Loss: 21.136486
-    ## Epoch 100 - Loss: 20.663244
+    ## Epoch 50 - Loss: 18.660992
+    ## Epoch 100 - Loss: 18.260056
 
 ``` r
 # Deep time-dependent Cox (Coxtime)
@@ -148,8 +152,8 @@ mod3 <- survdnn(
   )
 ```
 
-    ## Epoch 50 - Loss: 4.856084
-    ## Epoch 100 - Loss: 5.289982
+    ## Epoch 50 - Loss: 4.899240
+    ## Epoch 100 - Loss: 4.835490
 
 ------------------------------------------------------------------------
 
@@ -165,7 +169,7 @@ cv_results <- cv_survdnn(
   hidden = c(16, 8),
   loss = "cox",
   epochs = 100
-)
+  )
 print(cv_results)
 ```
 
@@ -234,12 +238,24 @@ devtools::test()
 
 ------------------------------------------------------------------------
 
+## Reproducibility
+
+By default, Torch initializes model weights and shuffles minibatches
+with random draws, so results may differ at each run.  
+Unlike `set.seed()`, which only controls R’s RNG, `{torch}` uses its own
+RNG implemented in C++/CUDA. To ensure reproducibility, set the Torch
+seed before training:
+
+``` r
+torch::torch_manual_seed(123)
+```
+
+------------------------------------------------------------------------
+
 ## Availability
 
-The `survdnn` R package is available at:
+The `survdnn` R package is available on CRAN or at:
 <https://github.com/ielbadisy/survdnn>
-
-The package is currently under submission to CRAN.
 
 ------------------------------------------------------------------------
 
