@@ -12,6 +12,8 @@ tune_survdnn(
   param_grid,
   folds = 3,
   .seed = 42,
+  .device = c("auto", "cpu", "cuda"),
+  na_action = c("omit", "fail"),
   refit = FALSE,
   return = c("all", "summary", "best_model")
 )
@@ -31,7 +33,14 @@ Required names: `hidden`, `lr`, `activation`, `epochs`, `loss`.}
 
 \item{folds}{Number of cross-validation folds (default: 3).}
 
-\item{.seed}{Optional seed for reproducibility (default: 42).}
+\item{.seed}{Optional seed for reproducibility.}
+
+\item{.device}{Character string indicating the computation device used when fitting models
+during cross-validation and refitting. One of `"auto"`, `"cpu"`, or `"cuda"`. `"auto"`
+uses CUDA if available, otherwise falls back to CPU.}
+
+\item{na_action}{Character. How to handle missing values:
+`"omit"` drops incomplete rows; `"fail"` errors if any NA is present.}
 
 \item{refit}{Logical. If TRUE, refits the best model on the full dataset.}
 
