@@ -12,7 +12,9 @@ cv_survdnn(
   folds = 5,
   .seed = NULL,
   .device = c("auto", "cpu", "cuda"),
+  .threads = NULL,
   na_action = c("omit", "fail"),
+  verbose = TRUE,
   ...
 )
 }
@@ -33,8 +35,14 @@ cv_survdnn(
 in each fold. One of `"auto"`, `"cpu"`, or `"cuda"`. `"auto"` uses CUDA if available,
 otherwise falls back to CPU.}
 
+\item{.threads}{Optional positive integer. If provided, sets Torch CPU thread
+count before each fold fit via `torch::torch_set_num_threads()`.}
+
 \item{na_action}{Character. How to handle missing values within each fold:
 `"omit"` drops incomplete rows; `"fail"` errors if any NA is present.}
+
+\item{verbose}{Logical; whether to print cross-validation progress and propagate
+verbose messages to fitting/evaluation in each fold (default: TRUE).}
 
 \item{...}{Additional arguments passed to [survdnn()].}
 }
@@ -46,17 +54,18 @@ Performs cross-validation for a `survdnn` model using the specified evaluation m
 }
 \examples{
 \donttest{
-library(survival)
-data(veteran)
-cv_survdnn(
-  Surv(time, status) ~ age + karno + celltype,
-  data = veteran,
-  times = c(30, 90, 180),
-  metrics = "ibs",
-  folds = 3,
-  .seed = 42,
-  hidden = c(16, 8),
-  epochs = 5
-)
+if (requireNamespace("torch", quietly = TRUE) && torch::torch_is_installed()) {
+  veteran <- survival::veteran
+  cv_survdnn(
+    survival::Surv(time, status) ~ age + karno + celltype,
+    data = veteran,
+    times = c(30, 90, 180),
+    metrics = "ibs",
+    folds = 3,
+    .seed = 42,
+    hidden = c(16, 8),
+    epochs = 5
+  )
+}
 }
 }

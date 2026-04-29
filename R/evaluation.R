@@ -45,7 +45,7 @@ evaluate_survdnn <- function(model,
   n_after <- nrow(mf)
   n_removed <- n_before - n_after
   if (n_removed > 0 && isTRUE(verbose) && na_action == "omit") {
-    message(sprintf("Removed %d observations with missing values in evaluation data.", n_removed))
+    message(sprintf("[survdnn::eval] removed %d observations with missing values in evaluation data.", n_removed))
   }
 
   y <- model.response(mf)
@@ -89,8 +89,12 @@ evaluate_survdnn <- function(model,
 #' @param .device Character string indicating the computation device used when fitting the models
 #'   in each fold. One of `"auto"`, `"cpu"`, or `"cuda"`. `"auto"` uses CUDA if available,
 #'   otherwise falls back to CPU.
+#' @param .threads Optional positive integer. If provided, sets Torch CPU thread
+#'   count before each fold fit via `torch::torch_set_num_threads()`.
 #' @param na_action Character. How to handle missing values within each fold:
 #'   `"omit"` drops incomplete rows; `"fail"` errors if any NA is present.
+#' @param verbose Logical; whether to print cross-validation progress and propagate
+#'   verbose messages to fitting/evaluation in each fold (default: TRUE).
 #' @param ... Additional arguments passed to [survdnn()].
 #'
 #' @return A tibble containing metric values per fold and (optionally) per time point.
@@ -98,25 +102,28 @@ evaluate_survdnn <- function(model,
 #'
 #' @examples
 #' \donttest{
-#' library(survival)
-#' data(veteran)
-#' cv_survdnn(
-#'   Surv(time, status) ~ age + karno + celltype,
-#'   data = veteran,
-#'   times = c(30, 90, 180),
-#'   metrics = "ibs",
-#'   folds = 3,
-#'   .seed = 42,
-#'   hidden = c(16, 8),
-#'   epochs = 5
-#' )
+#' if (requireNamespace("torch", quietly = TRUE) && torch::torch_is_installed()) {
+#'   veteran <- survival::veteran
+#'   cv_survdnn(
+#'     survival::Surv(time, status) ~ age + karno + celltype,
+#'     data = veteran,
+#'     times = c(30, 90, 180),
+#'     metrics = "ibs",
+#'     folds = 3,
+#'     .seed = 42,
+#'     hidden = c(16, 8),
+#'     epochs = 5
+#'   )
+#' }
 #' }
 cv_survdnn <- function(formula, data, times,
                        metrics = c("cindex", "ibs"),
                        folds = 5,
                        .seed = NULL,
                        .device = c("auto", "cpu", "cuda"),
+                       .threads = NULL,
                        na_action = c("omit", "fail"),
+                       verbose = TRUE,
                        ...) {
 
   .device   <- match.arg(.device)
@@ -132,6 +139,21 @@ cv_survdnn <- function(formula, data, times,
 
   if (!is.null(.seed)) survdnn_set_seed(.seed)
 
+  if (isTRUE(verbose)) {
+    message(
+      sprintf(
+        "[survdnn::cv] start: folds=%d n=%d metrics=%s times=%s",
+        folds,
+        nrow(data),
+        paste(metrics, collapse = ","),
+        paste(times, collapse = ",")
+      )
+    )
+    if (!is.null(.threads)) {
+      message(sprintf("[survdnn::cv] cpu_threads=%d", as.integer(.threads)))
+    }
+  }
+
   status_var <- all.vars(formula[[2]])[2]          # more safe for extracting the status
   vfolds <- rsample::vfold_cv(data, v = folds, strata = dplyr::all_of(status_var))
 
@@ -143,11 +165,22 @@ cv_survdnn <- function(formula, data, times,
     train_data <- rsample::analysis(split)
     test_data  <- rsample::assessment(split)
 
+    if (isTRUE(verbose)) {
+      message(
+        sprintf(
+          "[survdnn::cv] fold %d/%d: train_n=%d test_n=%d",
+          i, folds, nrow(train_data), nrow(test_data)
+        )
+      )
+    }
+
     model <- survdnn(
       formula,
       data      = train_data,
+      verbose   = verbose,
       .seed     = .seed,
       .device   = .device,
+      .threads  = .threads,
       na_action = na_action,
       ...
     )
@@ -158,12 +191,19 @@ cv_survdnn <- function(formula, data, times,
       times     = times,
       newdata   = test_data,
       na_action = na_action,
-      verbose   = FALSE
+      verbose   = verbose
     )
 
     eval_tbl$fold <- i
+    if (isTRUE(verbose)) {
+      message(sprintf("[survdnn::cv] fold %d/%d done.", i, folds))
+    }
     eval_tbl
   })
+
+  if (isTRUE(verbose)) {
+    message(sprintf("[survdnn::cv] done: completed %d folds.", folds))
+  }
 
   dplyr::select(results, fold, metric, time = dplyr::any_of("time"), value)
 }
@@ -182,19 +222,20 @@ cv_survdnn <- function(formula, data, times,
 #'
 #' @examples
 #' \donttest{
-#' library(survival)
-#' data(veteran)
-#' res <- cv_survdnn(
-#'   Surv(time, status) ~ age + karno + celltype,
-#'   data = veteran,
-#'   times = c(30, 90, 180, 270),
-#'   metrics = c("cindex", "ibs"),
-#'   folds = 3,
-#'   .seed = 42,
-#'   hidden = c(16, 8),
-#'   epochs = 5
-#' )
-#' summarize_cv_survdnn(res)
+#' if (requireNamespace("torch", quietly = TRUE) && torch::torch_is_installed()) {
+#'   veteran <- survival::veteran
+#'   res <- cv_survdnn(
+#'     survival::Surv(time, status) ~ age + karno + celltype,
+#'     data = veteran,
+#'     times = c(30, 90, 180, 270),
+#'     metrics = c("cindex", "ibs"),
+#'     folds = 3,
+#'     .seed = 42,
+#'     hidden = c(16, 8),
+#'     epochs = 5
+#'   )
+#'   summarize_cv_survdnn(res)
+#' }
 #' }
 summarize_cv_survdnn <- function(cv_results, by_time = TRUE, conf_level = 0.95) {
   stopifnot(all(c("fold", "metric", "value") %in% names(cv_results)))

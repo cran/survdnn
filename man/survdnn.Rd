@@ -20,6 +20,7 @@ survdnn(
   callbacks = NULL,
   .seed = NULL,
   .device = c("auto", "cpu", "cuda"),
+  .threads = NULL,
   na_action = c("omit", "fail")
 )
 }
@@ -45,7 +46,7 @@ Supported options: `"relu"`, `"leaky_relu"`, `"tanh"`, `"sigmoid"`, `"gelu"`, `"
 \item{optim_args}{Optional named list of additional arguments passed to the
 underlying torch optimizer (e.g., `list(weight_decay = 1e-4, momentum = 0.9)`).}
 
-\item{verbose}{Logical; whether to print loss progress every 50 epochs (default: TRUE).}
+\item{verbose}{Logical; whether to print progress and periodic loss updates during fitting (default: TRUE).}
 
 \item{dropout}{Numeric between 0 and 1. Dropout rate applied after each
 hidden layer (default = 0.3). Set to 0 to disable dropout.}
@@ -63,6 +64,9 @@ weight initialization, shuffling, and dropout.}
 \item{.device}{Character string indicating the computation device.
 One of `"auto"`, `"cpu"`, or `"cuda"`. `"auto"` uses CUDA if available,
 otherwise falls back to CPU.}
+
+\item{.threads}{Optional positive integer. If provided, sets the global
+Torch CPU thread count via `torch::torch_set_num_threads()`.}
 
 \item{na_action}{Character. How to handle missing values in the model variables:
 `"omit"` drops incomplete rows (and reports how many were removed when `verbose=TRUE`);
@@ -87,6 +91,7 @@ An object of class `"survdnn"` containing:
   \item{optimizer}{Optimizer name used.}
   \item{optim_args}{List of optimizer arguments used.}
   \item{device}{Torch device used for training (`torch_device`).}
+  \item{threads}{CPU thread setting passed via `.threads`; `NULL` means Torch default/global setting.}
   \item{aft_log_sigma}{Learned global log(sigma) for `loss="aft"`; `NA_real_` otherwise.}
   \item{aft_loc}{AFT log-time location offset used for centering when `loss="aft"`; `NA_real_` otherwise.}
   \item{coxtime_time_center}{Mean used to scale time for CoxTime; `NA_real_` otherwise.}

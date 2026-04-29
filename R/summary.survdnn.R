@@ -12,16 +12,23 @@
 #'
 #' @examples
 #' \donttest{
-#' set.seed(42)
-#' sim_data <- data.frame(
-#'   age = rnorm(100, 60, 10),
-#'   sex = factor(sample(c("male", "female"), 100, TRUE)),
-#'   trt = factor(sample(c("A", "B"), 100, TRUE)),
-#'   time = rexp(100, 0.05),
-#'   status = rbinom(100, 1, 0.7)
-#' )
-#' mod <- survdnn(Surv(time, status) ~ age + sex + trt, data = sim_data, epochs = 50, verbose = FALSE)
-#' summary(mod)
+#' if (requireNamespace("torch", quietly = TRUE) && torch::torch_is_installed()) {
+#'   set.seed(42)
+#'   sim_data <- data.frame(
+#'     age = rnorm(100, 60, 10),
+#'     sex = factor(sample(c("male", "female"), 100, TRUE)),
+#'     trt = factor(sample(c("A", "B"), 100, TRUE)),
+#'     time = rexp(100, 0.05),
+#'     status = rbinom(100, 1, 0.7)
+#'   )
+#'   mod <- survdnn(
+#'     survival::Surv(time, status) ~ age + sex + trt,
+#'     data = sim_data,
+#'     epochs = 50,
+#'     verbose = FALSE
+#'   )
+#'   summary(mod)
+#' }
 #' }
 
 summary.survdnn <- function(object, ...) {
@@ -61,6 +68,7 @@ summary.survdnn <- function(object, ...) {
       loss_function = object$loss,
       optimizer     = object$optimizer,
       device        = object$device,
+      threads       = if (!is.null(object$threads)) object$threads else NA_integer_,
       na_action     = object$na_action
     ),
     data_summary = list(
@@ -111,6 +119,7 @@ summary.survdnn <- function(object, ...) {
   cat("  Loss function: ", out$training_summary$loss_function, "\n")
   cat("  Optimizer: ", out$training_summary$optimizer, "\n")
   cat("  Device: ", as.character(out$training_summary$device), "\n")
+  cat("  CPU threads: ", if (is.na(out$training_summary$threads)) "default" else out$training_summary$threads, "\n")
   cat("  NA action: ", as.character(out$training_summary$na_action), "\n")
 
   cat("\nData summary:\n")

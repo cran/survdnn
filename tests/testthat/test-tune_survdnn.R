@@ -20,6 +20,8 @@ test_that("tune_survdnn returns correct structure for all modes", {
     param_grid = param_grid,
     folds = 2,
     .seed = 123,
+    .threads = 1,
+    verbose = FALSE,
     refit = FALSE,
     return = "all"
   )
@@ -35,6 +37,8 @@ test_that("tune_survdnn returns correct structure for all modes", {
     param_grid = param_grid,
     folds = 2,
     .seed = 123,
+    .threads = 1,
+    verbose = FALSE,
     refit = FALSE,
     return = "summary"
   )
@@ -50,6 +54,8 @@ test_that("tune_survdnn returns correct structure for all modes", {
     param_grid = param_grid,
     folds = 2,
     .seed = 123,
+    .threads = 1,
+    verbose = FALSE,
     refit = FALSE,
     return = "best_model"
   )
@@ -80,6 +86,8 @@ test_that("tune_survdnn works with refit = TRUE and returns survdnn model", {
     param_grid = param_grid,
     folds = 2,
     .seed = 42,
+    .threads = 1,
+    verbose = FALSE,
     refit = TRUE,
     return = "best_model"
   )
@@ -110,6 +118,8 @@ test_that("summarize_tune_survdnn aggregates correctly and throws on bad input",
     param_grid = param_grid,
     folds = 2,
     .seed = 123,
+    .threads = 1,
+    verbose = FALSE,
     refit = FALSE,
     return = "all"
   )
@@ -122,4 +132,57 @@ test_that("summarize_tune_survdnn aggregates correctly and throws on bad input",
   }
 
   expect_error(summarize_tune_survdnn(data.frame(a = 1)), "Input must be the result")
+})
+
+test_that("tune_survdnn verbose controls progress messages", {
+  skip_on_cran()
+  skip_if_not(torch::torch_is_installed())
+
+  data <- survival::veteran
+  param_grid <- list(
+    hidden     = list(c(8)),
+    lr         = c(1e-3),
+    activation = c("relu"),
+    epochs     = c(1),
+    loss       = c("cox")
+  )
+
+  msg_on <- capture.output(
+    tune_survdnn(
+      Surv(time, status) ~ age + karno + celltype,
+      data = data,
+      times = c(30),
+      metrics = "cindex",
+      param_grid = param_grid,
+      folds = 2,
+      .seed = 123,
+      .threads = 1,
+      verbose = TRUE,
+      refit = FALSE,
+      return = "summary"
+    ),
+    type = "message"
+  )
+
+  expect_true(any(grepl("\\[survdnn::tune\\]", msg_on)))
+  expect_true(any(grepl("\\[survdnn::cv\\]", msg_on)))
+
+  msg_off <- capture.output(
+    tune_survdnn(
+      Surv(time, status) ~ age + karno + celltype,
+      data = data,
+      times = c(30),
+      metrics = "cindex",
+      param_grid = param_grid,
+      folds = 2,
+      .seed = 123,
+      .threads = 1,
+      verbose = FALSE,
+      refit = FALSE,
+      return = "summary"
+    ),
+    type = "message"
+  )
+
+  expect_false(any(grepl("\\[survdnn::tune\\]|\\[survdnn::cv\\]|\\[survdnn::fit\\]", msg_off)))
 })

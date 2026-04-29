@@ -77,7 +77,7 @@ build_dnn <- function(
 #'   `"adam"`, `"adamw"`, `"sgd"`, `"rmsprop"`, or `"adagrad"`. Defaults to `"adam"`.
 #' @param optim_args Optional named list of additional arguments passed to the
 #'   underlying torch optimizer (e.g., `list(weight_decay = 1e-4, momentum = 0.9)`).
-#' @param verbose Logical; whether to print loss progress every 50 epochs (default: TRUE).
+#' @param verbose Logical; whether to print progress and periodic loss updates during fitting (default: TRUE).
 #' @param dropout Numeric between 0 and 1. Dropout rate applied after each
 #'   hidden layer (default = 0.3). Set to 0 to disable dropout.
 #' @param batch_norm Logical; whether to add batch normalization after each
@@ -90,6 +90,8 @@ build_dnn <- function(
 #' @param .device Character string indicating the computation device.
 #'   One of `"auto"`, `"cpu"`, or `"cuda"`. `"auto"` uses CUDA if available,
 #'   otherwise falls back to CPU.
+#' @param .threads Optional positive integer. If provided, sets the global
+#'   Torch CPU thread count via `torch::torch_set_num_threads()`.
 #' @param na_action Character. How to handle missing values in the model variables:
 #'   `"omit"` drops incomplete rows (and reports how many were removed when `verbose=TRUE`);
 #'   `"fail"` stops with an error if any missing values are present.
@@ -112,6 +114,7 @@ build_dnn <- function(
 #'   \item{optimizer}{Optimizer name used.}
 #'   \item{optim_args}{List of optimizer arguments used.}
 #'   \item{device}{Torch device used for training (`torch_device`).}
+#'   \item{threads}{CPU thread setting passed via `.threads`; `NULL` means Torch default/global setting.}
 #'   \item{aft_log_sigma}{Learned global log(sigma) for `loss="aft"`; `NA_real_` otherwise.}
 #'   \item{aft_loc}{AFT log-time location offset used for centering when `loss="aft"`; `NA_real_` otherwise.}
 #'   \item{coxtime_time_center}{Mean used to scale time for CoxTime; `NA_real_` otherwise.}
@@ -134,10 +137,12 @@ survdnn <- function(
   callbacks = NULL,
   .seed = NULL,
   .device = c("auto", "cpu", "cuda"),
+  .threads = NULL,
   na_action = c("omit", "fail")
 ) {
   survdnn_set_seed(.seed)
   device <- survdnn_get_device(.device)
+  survdnn_set_threads(.threads)
 
   loss      <- match.arg(loss)
   optimizer <- match.arg(optimizer)
@@ -173,7 +178,7 @@ survdnn <- function(
   n_after <- nrow(mf)
   n_removed <- n_before - n_after
   if (n_removed > 0 && isTRUE(verbose) && na_action == "omit") {
-    message(sprintf("Removed %d observations with missing values.", n_removed))
+    message(sprintf("[survdnn::fit] removed %d observations with missing values.", n_removed))
   }
 
   y        <- model.response(mf)
@@ -181,6 +186,18 @@ survdnn <- function(
   time     <- y[, "time"]
   status   <- y[, "status"]
   x_scaled <- scale(x)
+
+  if (isTRUE(verbose)) {
+    message(
+      sprintf(
+        "[survdnn::fit] start: n=%d p=%d loss=%s optimizer=%s epochs=%d device=%s",
+        nrow(mf), ncol(x), loss, optimizer, epochs, as.character(device)
+      )
+    )
+    if (!is.null(.threads)) {
+      message(sprintf("[survdnn::fit] cpu_threads=%d", as.integer(.threads)))
+    }
+  }
 
   # AFT location offset for stability
   aft_loc <- NA_real_
@@ -302,8 +319,8 @@ survdnn <- function(
     loss_history[epoch] <- current_loss
     last_epoch_run      <- epoch
 
-    if (verbose && epoch %% 50 == 0) {
-      cat(sprintf("Epoch %d - Loss: %.6f\n\n", epoch, current_loss))
+    if (isTRUE(verbose) && (epoch %% 50 == 0 || epoch == epochs)) {
+      message(sprintf("[survdnn::fit] epoch %d/%d loss=%.6f", epoch, epochs, current_loss))
     }
 
     if (!is.null(callbacks)) {
@@ -319,6 +336,9 @@ survdnn <- function(
 
   if (early_stopped && last_epoch_run < epochs) {
     loss_history <- loss_history[seq_len(last_epoch_run)]
+    if (isTRUE(verbose)) {
+      message(sprintf("[survdnn::fit] early stopping at epoch %d/%d.", last_epoch_run, epochs))
+    }
   }
 
   # store learned AFT log(sigma) robustly
@@ -327,6 +347,16 @@ survdnn <- function(
     if (!is.finite(aft_log_sigma)) aft_log_sigma <- NA_real_
   } else {
     aft_log_sigma <- NA_real_
+  }
+
+  if (isTRUE(verbose)) {
+    message(
+      sprintf(
+        "[survdnn::fit] done: epochs_run=%d final_loss=%.6f",
+        last_epoch_run,
+        tail(loss_history, 1)
+      )
+    )
   }
 
   structure(
@@ -347,6 +377,7 @@ survdnn <- function(
       optimizer           = optimizer,
       optim_args          = optim_args,
       device              = device,
+      threads             = .threads,
       dropout             = dropout,
       batch_norm          = batch_norm,
       na_action           = na_action,

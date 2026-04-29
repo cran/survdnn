@@ -13,7 +13,9 @@ tune_survdnn(
   folds = 3,
   .seed = 42,
   .device = c("auto", "cpu", "cuda"),
+  .threads = NULL,
   na_action = c("omit", "fail"),
+  verbose = TRUE,
   refit = FALSE,
   return = c("all", "summary", "best_model")
 )
@@ -39,8 +41,14 @@ Required names: `hidden`, `lr`, `activation`, `epochs`, `loss`.}
 during cross-validation and refitting. One of `"auto"`, `"cpu"`, or `"cuda"`. `"auto"`
 uses CUDA if available, otherwise falls back to CPU.}
 
+\item{.threads}{Optional positive integer. If provided, sets Torch CPU thread
+count for all nested model fits via `torch::torch_set_num_threads()`.}
+
 \item{na_action}{Character. How to handle missing values:
 `"omit"` drops incomplete rows; `"fail"` errors if any NA is present.}
+
+\item{verbose}{Logical; whether to print tuning progress and propagate verbose
+messages to nested cross-validation and optional refit (default: TRUE).}
 
 \item{refit}{Logical. If TRUE, refits the best model on the full dataset.}
 

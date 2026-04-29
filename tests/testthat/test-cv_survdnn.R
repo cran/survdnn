@@ -11,6 +11,7 @@ test_that("cv_survdnn performs cross-validation and returns fold-level metrics",
     metrics = c("cindex", "ibs"),
     folds = 2,
     .seed = 123,
+    .threads = 1,
     hidden = c(8),
     epochs = 5,
     verbose = FALSE
@@ -41,4 +42,48 @@ test_that("cv_survdnn errors on missing inputs or bad arguments", {
     cv_survdnn(Surv(time, status) ~ ., df),
     "must provide a `times`"
   )
+})
+
+test_that("cv_survdnn verbose controls progress messages", {
+  skip_on_cran()
+  skip_if_not(torch::torch_is_installed())
+
+  data <- survival::veteran
+
+  msg_on <- capture.output(
+    cv_survdnn(
+      Surv(time, status) ~ age + karno + celltype,
+      data = data,
+      times = c(30),
+      metrics = c("ibs"),
+      folds = 2,
+      .seed = 123,
+      .threads = 1,
+      hidden = c(8),
+      epochs = 1,
+      verbose = TRUE
+    ),
+    type = "message"
+  )
+
+  expect_true(any(grepl("\\[survdnn::cv\\]", msg_on)))
+  expect_true(any(grepl("\\[survdnn::fit\\]", msg_on)))
+
+  msg_off <- capture.output(
+    cv_survdnn(
+      Surv(time, status) ~ age + karno + celltype,
+      data = data,
+      times = c(30),
+      metrics = c("ibs"),
+      folds = 2,
+      .seed = 123,
+      .threads = 1,
+      hidden = c(8),
+      epochs = 1,
+      verbose = FALSE
+    ),
+    type = "message"
+  )
+
+  expect_false(any(grepl("\\[survdnn::cv\\]|\\[survdnn::fit\\]|\\[survdnn::eval\\]", msg_off)))
 })
