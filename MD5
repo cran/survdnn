@@ -1,7 +1,7 @@
-36b6f92bdbc636cb93e7a770f1af9d05 *DESCRIPTION
+23597cf25a64180ee60fcec4ca436307 *DESCRIPTION
 bc95397aee92183f12ffceaeccd72dff *LICENSE
 b14da412795f45b1433ba049ca91e384 *NAMESPACE
-b0efbf0de1dc052aea6d9b5de2e167c2 *NEWS.md
+513c2655f5694b85a3237dac8a11bef6 *NEWS.md
 32d668d15bc2cc2191f97b505ece3a6f *R/callbacks.R
 4dd520baf567c5cfd1ee93d190dcf8a9 *R/evaluation.R
 9012c4ea5a31fe8bdfe4ea60d4f5aa13 *R/globals.R
@@ -16,7 +16,8 @@ b5f78f651b6f5954b10ff1a44d3bb1b8 *R/plot.survdnn.R
 dbce1c8cae2c35d65668b968a4d427ce *R/survdnn.R
 3256836754ad3093878b631bff2d8614 *R/tune_survdnn.R
 4c4dc425cdfe360629e5c8cc2d2841c2 *R/zzz.R
-fc4094dccf7fa8f8027da30369b07def *README.md
+337cd84bac157fdeb106b2a5446c9e24 *README.md
+1c92e0fdc4b7a93584ae867b8bd9ea4a *inst/CITATION
 dc6709277c13a154bfdb71b36268a012 *man/brier.Rd
 faf6bb0cae6cf2956cd090b816785090 *man/build_dnn.Rd
 76991bf98a5ea56f62784dd962dbc90c *man/callback_early_stopping.Rd

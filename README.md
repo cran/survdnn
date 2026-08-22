@@ -6,7 +6,10 @@
 
 [![License:
 MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)  
+[![r-universe](https://img.shields.io/badge/r--universe-0.7.6-0F6CBD?logo=r&logoColor=white)](https://ielbadisy.r-universe.dev/survdnn)  
 [![R-CMD-check](https://github.com/ielbadisy/survdnn/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/ielbadisy/survdnn/actions/workflows/R-CMD-check.yaml)
+[![Codecov](https://codecov.io/gh/ielbadisy/survdnn/branch/main/graph/badge.svg)](https://app.codecov.io/gh/ielbadisy/survdnn)  
+[![The R Journal](https://img.shields.io/badge/The%20R%20Journal-RJ--2026--008-2E74B5)](https://rjournal.github.io/articles/RJ-2026-008/)
 
 ## About
 
@@ -19,10 +22,27 @@ formula interface, supports model evaluation using time-dependent
 metrics (C-index, Brier score, IBS), cross-validation, and
 hyperparameter tuning.
 
-## Review status
+## Citation
 
-A methodological paper describing the design, implementation, and
-evaluation of `survdnn` is currently under review at *The R Journal*.
+Paper: [The R Journal
+article](https://rjournal.github.io/articles/RJ-2026-008/)
+
+If you use `survdnn`, please cite:
+
+``` bibtex
+@article{RJ-2026-008,
+  author = {Badisy, Imad El},
+  title = {The R Journal: SurvDNN: Survival Deep Learning Models for Tabular Data},
+  journal = {The R Journal},
+  year = {2026},
+  note = {https://doi.org/10.32614/RJ-2026-008},
+  doi = {10.32614/RJ-2026-008},
+  volume = {18},
+  issue = {1},
+  issn = {2073-4859},
+  pages = {384-399}
+}
+```
 
 ## Main features
 
@@ -85,14 +105,14 @@ summary(mod)
     ## 
     ## Formula:
     ##   Surv(time, status) ~ age + karno + celltype
-    ## <environment: 0x6011c835fbe0>
+    ## <environment: 0x5b4526e32988>
     ## 
     ## Model architecture:
     ##   Hidden layers:  32 : 16 
     ##   Activation:  relu 
     ##   Dropout:  0.3 
     ##   Batch norm:  TRUE 
-    ##   Final loss:  3.841008 
+    ##   Final loss:  3.867987 
     ## 
     ## Training summary:
     ##   Epochs:  300 
@@ -130,19 +150,19 @@ mod1 <- survdnn(
 
     ## [survdnn::fit] start: n=137 p=2 loss=cox optimizer=adam epochs=300 device=cpu
 
-    ## [survdnn::fit] epoch 50/300 loss=3.989828
+    ## [survdnn::fit] epoch 50/300 loss=4.032557
 
-    ## [survdnn::fit] epoch 100/300 loss=3.942912
+    ## [survdnn::fit] epoch 100/300 loss=4.025298
 
-    ## [survdnn::fit] epoch 150/300 loss=3.890888
+    ## [survdnn::fit] epoch 150/300 loss=3.925760
 
-    ## [survdnn::fit] epoch 200/300 loss=3.869117
+    ## [survdnn::fit] epoch 200/300 loss=3.908267
 
-    ## [survdnn::fit] epoch 250/300 loss=3.866454
+    ## [survdnn::fit] epoch 250/300 loss=3.904748
 
-    ## [survdnn::fit] epoch 300/300 loss=3.870147
+    ## [survdnn::fit] epoch 300/300 loss=3.893675
 
-    ## [survdnn::fit] done: epochs_run=300 final_loss=3.870147
+    ## [survdnn::fit] done: epochs_run=300 final_loss=3.893675
 
 - Accelerated Failure Time
 
@@ -157,19 +177,19 @@ mod2 <- survdnn(
 
     ## [survdnn::fit] start: n=137 p=2 loss=aft optimizer=adam epochs=300 device=cpu
 
-    ## [survdnn::fit] epoch 50/300 loss=4.628552
+    ## [survdnn::fit] epoch 50/300 loss=4.772373
 
-    ## [survdnn::fit] epoch 100/300 loss=4.641005
+    ## [survdnn::fit] epoch 100/300 loss=4.735664
 
-    ## [survdnn::fit] epoch 150/300 loss=4.563893
+    ## [survdnn::fit] epoch 150/300 loss=4.662155
 
-    ## [survdnn::fit] epoch 200/300 loss=4.507134
+    ## [survdnn::fit] epoch 200/300 loss=4.628159
 
-    ## [survdnn::fit] epoch 250/300 loss=4.501204
+    ## [survdnn::fit] epoch 250/300 loss=4.622926
 
-    ## [survdnn::fit] epoch 300/300 loss=4.494009
+    ## [survdnn::fit] epoch 300/300 loss=4.604257
 
-    ## [survdnn::fit] done: epochs_run=300 final_loss=4.494009
+    ## [survdnn::fit] done: epochs_run=300 final_loss=4.604257
 
 - Coxtime
 
@@ -184,19 +204,19 @@ mod3 <- survdnn(
 
     ## [survdnn::fit] start: n=137 p=2 loss=coxtime optimizer=adam epochs=300 device=cpu
 
-    ## [survdnn::fit] epoch 50/300 loss=3.946552
+    ## [survdnn::fit] epoch 50/300 loss=4.151459
 
-    ## [survdnn::fit] epoch 100/300 loss=3.955686
+    ## [survdnn::fit] epoch 100/300 loss=4.018471
 
-    ## [survdnn::fit] epoch 150/300 loss=3.944864
+    ## [survdnn::fit] epoch 150/300 loss=3.997110
 
-    ## [survdnn::fit] epoch 200/300 loss=3.930768
+    ## [survdnn::fit] epoch 200/300 loss=3.983270
 
-    ## [survdnn::fit] epoch 250/300 loss=3.838923
+    ## [survdnn::fit] epoch 250/300 loss=3.925767
 
-    ## [survdnn::fit] epoch 300/300 loss=3.889966
+    ## [survdnn::fit] epoch 300/300 loss=3.850844
 
-    ## [survdnn::fit] done: epochs_run=300 final_loss=3.889966
+    ## [survdnn::fit] done: epochs_run=300 final_loss=3.850844
 
 ## Cross-validation
 
@@ -380,19 +400,19 @@ mod <- survdnn(
 
     ## [survdnn::fit] cpu_threads=4
 
-    ## [survdnn::fit] epoch 50/300 loss=3.962863
+    ## [survdnn::fit] epoch 50/300 loss=3.895973
 
-    ## [survdnn::fit] epoch 100/300 loss=3.952089
+    ## [survdnn::fit] epoch 100/300 loss=3.861168
 
-    ## [survdnn::fit] epoch 150/300 loss=3.896662
+    ## [survdnn::fit] epoch 150/300 loss=3.843835
 
-    ## [survdnn::fit] epoch 200/300 loss=3.834132
+    ## [survdnn::fit] epoch 200/300 loss=3.803881
 
-    ## [survdnn::fit] epoch 250/300 loss=3.866578
+    ## [survdnn::fit] epoch 250/300 loss=3.842178
 
-    ## [survdnn::fit] epoch 300/300 loss=3.821199
+    ## [survdnn::fit] epoch 300/300 loss=3.823312
 
-    ## [survdnn::fit] done: epochs_run=300 final_loss=3.821199
+    ## [survdnn::fit] done: epochs_run=300 final_loss=3.823312
 
 The same `.threads` argument is available in `cv_survdnn()` and
 `tune_survdnn()`.
@@ -419,6 +439,8 @@ The `survdnn` R package is available on
 ## Contributions
 
 Contributions, issues, and feature requests are welcome!
+
+Daniel Falbel is a contributor to this package.
 
 Open an [issue](https://github.com/ielbadisy/survdnn/issues) or submit a
 pull request.
